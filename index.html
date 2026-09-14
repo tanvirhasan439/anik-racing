@@ -1,24 +1,198 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anik Racing Online</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Anik Racing Online</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #111;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+}
+
+.game {
+    width: 100%;
+    height: 100vh;
+    position: relative;
+    background: #222;
+}
+
+.road {
+    position: absolute;
+    width: 80%;
+    max-width: 500px;
+    height: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #444;
+    border-left: 8px solid white;
+    border-right: 8px solid white;
+}
+
+.line {
+    position: absolute;
+    width: 10px;
+    height: 80px;
+    background: white;
+    left: 50%;
+    transform: translateX(-50%);
+    animation: roadMove 0.7s linear infinite;
+}
+
+.line:nth-child(1) {
+    top: -100px;
+}
+
+.line:nth-child(2) {
+    top: 200px;
+    animation-delay: 0.2s;
+}
+
+.line:nth-child(3) {
+    top: 500px;
+    animation-delay: 0.4s;
+}
+
+@keyframes roadMove {
+    from {
+        transform: translate(-50%, -100px);
+    }
+    to {
+        transform: translate(-50%, 110vh);
+    }
+}
+
+.car {
+    position: absolute;
+    width: 55px;
+    height: 95px;
+    background: red;
+    border-radius: 12px;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid white;
+}
+
+.window {
+    position: absolute;
+    width: 35px;
+    height: 25px;
+    background: #111;
+    top: 12px;
+    left: 6px;
+    border-radius: 5px;
+}
+
+.controls {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    z-index: 10;
+}
+
+button {
+    width: 80px;
+    height: 55px;
+    font-size: 25px;
+    border: none;
+    border-radius: 15px;
+    background: white;
+}
+
+.title {
+    position: absolute;
+    top: 15px;
+    width: 100%;
+    text-align: center;
+    color: white;
+    z-index: 10;
+}
+
+.score {
+    font-size: 18px;
+}
+</style>
 </head>
 
 <body>
 
-    <h1>Anik Racing Online 🏎️</h1>
+<div class="game">
 
-    <p>Online Multiplayer Racing Game</p>
+    <div class="title">
+        <h2>🏎️ Anik Racing Online</h2>
+        <div class="score">Score: <span id="score">0</span></div>
+    </div>
 
-    <button onclick="startGame()">START RACE</button>
+    <div class="road">
 
-    <script>
-        function startGame() {
-            alert("Race is starting! 🏁");
-        }
-    </script>
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+
+        <div class="car" id="car">
+            <div class="window"></div>
+        </div>
+
+    </div>
+
+    <div class="controls">
+        <button onclick="moveLeft()">⬅️</button>
+        <button onclick="moveRight()">➡️</button>
+    </div>
+
+</div>
+
+<script>
+
+let car = document.getElementById("car");
+let scoreText = document.getElementById("score");
+
+let position = 50;
+let score = 0;
+
+function moveLeft() {
+
+    position -= 8;
+
+    if (position < 12) {
+        position = 12;
+    }
+
+    car.style.left = position + "%";
+}
+
+function moveRight() {
+
+    position += 8;
+
+    if (position > 88) {
+        position = 88;
+    }
+
+    car.style.left = position + "%";
+}
+
+setInterval(function() {
+
+    score++;
+
+    scoreText.textContent = score;
+
+}, 1000);
+
+</script>
 
 </body>
 </html>
