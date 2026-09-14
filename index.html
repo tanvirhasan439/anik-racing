@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Anik Racing Online</title>
 
 <style>
@@ -13,16 +12,16 @@
 
 body {
     margin: 0;
+    overflow: hidden;
     background: #111;
     font-family: Arial, sans-serif;
-    overflow: hidden;
 }
 
 .game {
-    width: 100%;
+    width: 100vw;
     height: 100vh;
     position: relative;
-    background: #222;
+    background: #16823a;
 }
 
 .road {
@@ -35,36 +34,38 @@ body {
     background: #444;
     border-left: 8px solid white;
     border-right: 8px solid white;
+    overflow: hidden;
 }
 
-.line {
+.lane {
     position: absolute;
-    width: 10px;
-    height: 80px;
+    width: 8px;
+    height: 100px;
     background: white;
     left: 50%;
     transform: translateX(-50%);
-    animation: roadMove 0.7s linear infinite;
+    animation: roadMove 0.6s linear infinite;
 }
 
-.line:nth-child(1) {
-    top: -100px;
+.lane:nth-child(1) {
+    top: -120px;
 }
 
-.line:nth-child(2) {
-    top: 200px;
-    animation-delay: 0.2s;
+.lane:nth-child(2) {
+    top: 250px;
+    animation-delay: .2s;
 }
 
-.line:nth-child(3) {
-    top: 500px;
-    animation-delay: 0.4s;
+.lane:nth-child(3) {
+    top: 620px;
+    animation-delay: .4s;
 }
 
 @keyframes roadMove {
     from {
-        transform: translate(-50%, -100px);
+        transform: translate(-50%, -150px);
     }
+
     to {
         transform: translate(-50%, 110vh);
     }
@@ -74,12 +75,21 @@ body {
     position: absolute;
     width: 55px;
     height: 95px;
-    background: red;
     border-radius: 12px;
+    border: 4px solid white;
+}
+
+.player {
+    background: red;
     bottom: 80px;
     left: 50%;
     transform: translateX(-50%);
-    border: 4px solid white;
+}
+
+.enemy {
+    background: blue;
+    top: -120px;
+    left: 30%;
 }
 
 .window {
@@ -87,9 +97,26 @@ body {
     width: 35px;
     height: 25px;
     background: #111;
-    top: 12px;
+    top: 10px;
     left: 6px;
     border-radius: 5px;
+}
+
+.info {
+    position: absolute;
+    top: 10px;
+    width: 100%;
+    text-align: center;
+    color: white;
+    z-index: 10;
+}
+
+.info h2 {
+    margin: 5px;
+}
+
+.score {
+    font-size: 18px;
 }
 
 .controls {
@@ -99,29 +126,32 @@ body {
     display: flex;
     justify-content: center;
     gap: 40px;
-    z-index: 10;
+    z-index: 20;
 }
 
 button {
     width: 80px;
     height: 55px;
-    font-size: 25px;
     border: none;
     border-radius: 15px;
-    background: white;
+    font-size: 25px;
 }
 
-.title {
+.gameOver {
+    display: none;
     position: absolute;
-    top: 15px;
-    width: 100%;
-    text-align: center;
+    inset: 0;
+    background: rgba(0,0,0,.75);
     color: white;
-    z-index: 10;
+    z-index: 30;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
 }
 
-.score {
+.gameOver button {
     font-size: 18px;
+    width: 140px;
 }
 </style>
 </head>
@@ -130,18 +160,24 @@ button {
 
 <div class="game">
 
-    <div class="title">
+    <div class="info">
         <h2>🏎️ Anik Racing Online</h2>
-        <div class="score">Score: <span id="score">0</span></div>
+        <div class="score">
+            Score: <span id="score">0</span>
+        </div>
     </div>
 
     <div class="road">
 
-        <div class="line"></div>
-        <div class="line"></div>
-        <div class="line"></div>
+        <div class="lane"></div>
+        <div class="lane"></div>
+        <div class="lane"></div>
 
-        <div class="car" id="car">
+        <div class="car player" id="player">
+            <div class="window"></div>
+        </div>
+
+        <div class="car enemy" id="enemy">
             <div class="window"></div>
         </div>
 
@@ -152,45 +188,101 @@ button {
         <button onclick="moveRight()">➡️</button>
     </div>
 
+    <div class="gameOver" id="gameOver">
+        <h1>💥 GAME OVER</h1>
+        <p>Your Score: <span id="finalScore">0</span></p>
+        <button onclick="location.reload()">RESTART</button>
+    </div>
+
 </div>
 
 <script>
 
-let car = document.getElementById("car");
-let scoreText = document.getElementById("score");
+const player = document.getElementById("player");
+const enemy = document.getElementById("enemy");
 
-let position = 50;
+const scoreText = document.getElementById("score");
+const finalScore = document.getElementById("finalScore");
+const gameOver = document.getElementById("gameOver");
+
+let playerPosition = 50;
+let enemyTop = -120;
+let enemyPosition = 30;
+
 let score = 0;
+let gameRunning = true;
 
 function moveLeft() {
 
-    position -= 8;
+    if (!gameRunning) return;
 
-    if (position < 12) {
-        position = 12;
+    playerPosition -= 8;
+
+    if (playerPosition < 12) {
+        playerPosition = 12;
     }
 
-    car.style.left = position + "%";
+    player.style.left = playerPosition + "%";
 }
 
 function moveRight() {
 
-    position += 8;
+    if (!gameRunning) return;
 
-    if (position > 88) {
-        position = 88;
+    playerPosition += 8;
+
+    if (playerPosition > 88) {
+        playerPosition = 88;
     }
 
-    car.style.left = position + "%";
+    player.style.left = playerPosition + "%";
 }
 
-setInterval(function() {
+function moveEnemy() {
 
-    score++;
+    if (!gameRunning) return;
 
-    scoreText.textContent = score;
+    enemyTop += 6;
 
-}, 1000);
+    enemy.style.top = enemyTop + "px";
+
+    if (enemyTop > window.innerHeight) {
+
+        enemyTop = -120;
+
+        enemyPosition = Math.random() * 70 + 15;
+
+        enemy.style.left = enemyPosition + "%";
+
+        score++;
+
+        scoreText.textContent = score;
+    }
+
+    checkCollision();
+}
+
+function checkCollision() {
+
+    const playerRect = player.getBoundingClientRect();
+    const enemyRect = enemy.getBoundingClientRect();
+
+    if (
+        playerRect.left < enemyRect.right &&
+        playerRect.right > enemyRect.left &&
+        playerRect.top < enemyRect.bottom &&
+        playerRect.bottom > enemyRect.top
+    ) {
+
+        gameRunning = false;
+
+        finalScore.textContent = score;
+
+        gameOver.style.display = "flex";
+    }
+}
+
+setInterval(moveEnemy, 30);
 
 </script>
 
